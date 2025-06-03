@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Fatigue Detector | AI-Powered Productivity Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px 0;
+            border: none;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.1)" points="0,1000 1000,0 1000,1000"/></svg>');
+            background-size: cover;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero .lead {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .btn-hero {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn-hero-primary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-hero-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-hero-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateY(-3px);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 40px 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .feature-description {
+            color: #5a6c7d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: 800;
+            margin-bottom: 50px;
+            text-align: center;
+            font-size: 3rem;
+        }
+
+        .section-subtitle {
+            color: #7f8c8d;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 60px;
+            font-weight: 400;
+        }
+
+        .how-it-works-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+            padding: 80px 0;
+        }
+
+        .step-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-number {
+            font-size: 3rem;
+            font-weight: 800;
+            opacity: 0.3;
+            position: absolute;
+            top: 20px;
+            right: 30px;
+        }
+
+        .step-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-brain me-2"></i>Mental Fatigue Detector
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#"><i class="bi bi-house me-1"></i>Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#features"><i class="bi bi-star me-1"></i>Features</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#how-it-works"><i class="bi bi-gear me-1"></i>How It Works</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard/view/"><i class="bi bi-graph-up me-1"></i>Dashboard</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-hero-primary" href="/data_collection/">
+                                <i class="bi bi-play-circle me-2"></i>Get Started
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1><i class="bi bi-cpu me-3"></i>AI-Powered Mental Fatigue Detection</h1>
+                    <p class="lead">Transform your productivity with intelligent fatigue monitoring and personalized insights powered by advanced machine learning algorithms.</p>
+                    <div class="mt-5">
+                        <a href="/data_collection/" class="btn-hero btn-hero-primary">
+                            <i class="bi bi-rocket-takeoff me-2"></i>Start Analysis
+                        </a>
+                        <a href="#features" class="btn-hero btn-hero-secondary">
+                            <i class="bi bi-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-5">
+            <div class="container">
+                <h2 class="section-title">Advanced Features</h2>
+                <p class="section-subtitle">Cutting-edge technology for comprehensive fatigue analysis</p>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-activity"></i>
+                            </div>
+                            <h3 class="feature-title">Real-time Monitoring</h3>
+                            <p class="feature-description">Advanced behavioral analysis tracks your mental fatigue levels continuously throughout your work session with precision accuracy.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-cpu"></i>
+                            </div>
+                            <h3 class="feature-title">AI-Powered Insights</h3>
+                            <p class="feature-description">Machine learning algorithms trained on real datasets analyze typing patterns, mouse movements, and facial expressions for accurate fatigue detection.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-rocket-takeoff"></i>
+                            </div>
+                            <h3 class="feature-title">Productivity Optimization</h3>
+                            <p class="feature-description">Receive personalized, actionable recommendations to boost productivity and maintain optimal performance levels based on your fatigue patterns.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h3 class="feature-title">Advanced Analytics</h3>
+                            <p class="feature-description">Comprehensive dashboard with interactive charts, trend analysis, and detailed metrics to understand your productivity patterns over time.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <h3 class="feature-title">Privacy-First Design</h3>
+                            <p class="feature-description">All data processing happens locally with secure, encrypted storage. Your personal information and behavioral patterns remain completely private.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <h3 class="feature-title">Instant Results</h3>
+                            <p class="feature-description">Get immediate fatigue analysis and recommendations within seconds of completing the assessment, powered by optimized ML models.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="how-it-works-section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Four simple steps to unlock your productivity potential</p>
+                <div class="row g-4">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">01</div>
+                            <div class="step-icon">
+                                <i class="bi bi-collection"></i>
+                            </div>
+                            <h3 class="step-title">Data Collection</h3>
+                            <p>Complete interactive assessments including typing analysis, mouse coordination tests, and facial expression monitoring to gather comprehensive behavioral data.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">02</div>
+                            <div class="step-icon">
+                                <i class="bi bi-gear-wide-connected"></i>
+                            </div>
+                            <h3 class="step-title">AI Analysis</h3>
+                            <p>Advanced machine learning models trained on real datasets analyze your behavioral patterns to accurately detect mental fatigue levels and performance indicators.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">03</div>
+                            <div class="step-icon">
+                                <i class="bi bi-lightbulb"></i>
+                            </div>
+                            <h3 class="step-title">Smart Insights</h3>
+                            <p>Receive personalized recommendations and actionable insights based on your unique fatigue patterns, work habits, and performance optimization opportunities.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="step-card">
+                            <div class="step-number">04</div>
+                            <div class="step-icon">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </div>
+                            <h3 class="step-title">Continuous Improvement</h3>
+                            <p>Track your progress over time with detailed analytics and adaptive recommendations that evolve with your changing work patterns and productivity goals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="container text-center">
+                <h2 class="display-4 fw-bold mb-4">
+                    <i class="bi bi-rocket-takeoff me-3"></i>Ready to Transform Your Productivity?
+                </h2>
+                <p class="lead mb-5">Join thousands of professionals who have optimized their work performance with AI-powered fatigue detection and personalized insights.</p>
+                <div class="d-flex justify-content-center flex-wrap gap-3">
+                    <a href="/data_collection/" class="btn-hero btn-hero-primary">
+                        <i class="bi bi-play-circle me-2"></i>Start Free Analysis
+                    </a>
+                    <a href="/dashboard/view/" class="btn-hero btn-hero-secondary">
+                        <i class="bi bi-graph-up me-2"></i>View Demo Dashboard
+                    </a>
+                </div>
+                <div class="mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="h3 fw-bold">410+</div>
+                                    <div class="text-light">Real Training Samples</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="h3 fw-bold">89%</div>
+                                    <div class="text-light">ML Accuracy</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="h3 fw-bold">3</div>
+                                    <div class="text-light">Analysis Modalities</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-brain me-2"></i>Mental Fatigue Detector
+                        </h5>
+                        <p class="mb-2">AI-Powered Mental Fatigue Detection & Productivity Analytics</p>
+                        <p class="text-muted mb-0">Transforming workplace productivity through intelligent behavioral analysis</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="mb-3">
+                            <a href="/data_collection/" class="text-white text-decoration-none me-4">
+                                <i class="bi bi-collection me-1"></i>Data Collection
+                            </a>
+                            <a href="/dashboard/view/" class="text-white text-decoration-none me-4">
+                                <i class="bi bi-graph-up me-1"></i>Dashboard
+                            </a>
+                            <a href="#features" class="text-white text-decoration-none">
+                                <i class="bi bi-star me-1"></i>Features
+                            </a>
+                        </div>
+                        <p class="text-muted mb-0">&copy; 2024 Mental Fatigue Detector. All rights reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards for animation
+        document.querySelectorAll('.card, .step-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
