@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Fatigue Detector Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .fatigue-level {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin-top: 20px;
+        }
+        .recommendations {
+            margin-top: 20px;
+        }
+        .recommendation-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .data-source {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .refresh-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .refresh-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mental Fatigue Detector Dashboard</h1>
+        
+        <button id="refreshButton" class="refresh-button">Refresh Data</button>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Current Fatigue Level</h2>
+                <div id="fatigueLevel" class="fatigue-level">
+                    {% if latest_fatigue %}
+                        {{ latest_fatigue.fatigue_score|floatformat:1 }}%
+                    {% else %}
+                        No data available
+                    {% endif %}
+                </div>
+                <div class="data-source">
+                    Confidence: {% if latest_fatigue %}{{ latest_fatigue.confidence|floatformat:1 }}%{% else %}N/A{% endif %}
+                </div>
+                <div class="chart-container">
+                    <canvas id="fatigueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Behavior Data</h2>
+                <div id="behaviorData">
+                    {% if latest_behavior %}
+                        <p>Typing Speed: <span id="typingSpeed">{{ latest_behavior.typing_speed|floatformat:1 }}</span> WPM</p>
+                        <p>Mouse Movements: <span id="mouseMovements">{{ latest_behavior.mouse_movement_count }}</span></p>
+                    {% else %}
+                        <p>No behavior data available</p>
+                    {% endif %}
+                </div>
+                <div class="chart-container">
+                    <canvas id="behaviorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommendations">
+            <h2>Productivity Recommendations</h2>
+            <div id="recommendationsList">
+                {% if active_recommendations %}
+                    {% for rec in active_recommendations %}
+                        <div class="recommendation-item">
+                            <h3>{{ rec.recommendation_type }}</h3>
+                            <p>{{ rec.recommendation_text }}</p>
+                            <p>Priority: {{ rec.priority }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No active recommendations</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        const fatigueCtx = document.getElementById('fatigueChart').getContext('2d');
+        const behaviorCtx = document.getElementById('behaviorChart').getContext('2d');
+        
+        const fatigueChart = new Chart(fatigueCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Fatigue Level',
+                    data: [],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        
+        const behaviorChart = new Chart(behaviorCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Typing Speed', 'Mouse Movements'],
+                datasets: [{
+                    label: 'Current Values',
+                    data: [0, 0],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 99, 132, 0.5)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        
+        // Update data function
+        function updateData() {
+            fetch('/ml/predict/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+                
+                // Update fatigue level
+                document.getElementById('fatigueLevel').textContent = 
+                    `${data.fatigue_score.toFixed(1)}%`;
+                
+                // Update charts
+                const now = new Date().toLocaleTimeString();
+                fatigueChart.data.labels.push(now);
+                fatigueChart.data.datasets[0].data.push(data.fatigue_score);
+                
+                if (fatigueChart.data.labels.length > 10) {
+                    fatigueChart.data.labels.shift();
+                    fatigueChart.data.datasets[0].data.shift();
+                }
+                
+                fatigueChart.update();
+                
+                // Get behavior data
+                fetch('/data/behavior/', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(behaviorData => {
+                    if (behaviorData.typing_speed !== undefined) {
+                        document.getElementById('typingSpeed').textContent = 
+                            behaviorData.typing_speed.toFixed(1);
+                        behaviorChart.data.datasets[0].data[0] = behaviorData.typing_speed;
+                    }
+                    
+                    if (behaviorData.mouse_movement_count !== undefined) {
+                        document.getElementById('mouseMovements').textContent = 
+                            behaviorData.mouse_movement_count;
+                        behaviorChart.data.datasets[0].data[1] = behaviorData.mouse_movement_count;
+                    }
+                    
+                    behaviorChart.update();
+                });
+                
+                // Get recommendations
+                fetch('/ml/recommend/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.recommendations) {
+                        const recommendationsList = document.getElementById('recommendationsList');
+                        recommendationsList.innerHTML = data.recommendations.map(rec => `
+                            <div class="recommendation-item">
+                                <h3>${rec.type}</h3>
+                                <p>${rec.text}</p>
+                                <p>Priority: ${rec.priority}</p>
+                            </div>
+                        `).join('');
+                    }
+                });
+            });
+        }
+        
+        // Set up auto-refresh
+        setInterval(updateData, 30000);  // Update every 30 seconds
+        
+        // Manual refresh button
+        document.getElementById('refreshButton').addEventListener('click', updateData);
+        
+        // Initial data load
+        updateData();
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html> 
