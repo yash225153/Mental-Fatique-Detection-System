@@ -8,6 +8,8 @@ A comprehensive system that monitors user behavior to detect mental fatigue and 
 - Indrakant
 - Lokesh
 
+---
+
 ## Project Overview
 This system combines multiple data sources to detect mental fatigue and boost productivity:
 
@@ -29,6 +31,8 @@ This system combines multiple data sources to detect mental fatigue and boost pr
   - Live monitoring of user state
   - Interactive visualizations
   - Productivity insights
+
+---
 
 ## Tech Stack
 - **Backend**: Django
@@ -56,6 +60,7 @@ This system combines multiple data sources to detect mental fatigue and boost pr
 ### ✅ Results
 ![Result](Project%20Images/result.png)
 
+---
 
 ## Setup Instructions
 1. Create a virtual environment:
