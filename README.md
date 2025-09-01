@@ -38,6 +38,25 @@ This system combines multiple data sources to detect mental fatigue and boost pr
 - **Analytics**: Power BI
 - **Database**: SQLite
 
+---
+
+## 📸 Project Screenshots  
+
+### 🏠 Home Page
+![Home](Project%20Images/home.png)
+
+### 📊 Dashboard
+![Dashboard](Project%20Images/dashboard.png)
+
+### 📝 Data Collection
+![Data Collection 1](Project%20Images/datacollection1.png)  
+![Data Collection 2](Project%20Images/datacollection2%20(3).png)  
+![Data Collection 3](Project%20Images/datacollection3.png)
+
+### ✅ Results
+![Result](Project%20Images/result.png)
+
+
 ## Setup Instructions
 1. Create a virtual environment:
    ```bash
